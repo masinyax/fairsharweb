@@ -1,7 +1,8 @@
 "use client"
 
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { db, auth } from "@/lib/firebase"
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 
