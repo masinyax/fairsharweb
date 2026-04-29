@@ -1,8 +1,6 @@
 "use client"
 
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
-import { db, auth } from "@/lib/firebase"
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { signIn } from "@/lib/auth"
 import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 
@@ -11,23 +9,12 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-            lastLogin: serverTimestamp()
-        }, { merge: true });
-
-        console.log("User data saved/updated in Firestore");
+      await signIn();
+      router.push("/dashboard");
     } catch (error) {
-        console.error("Login error:", error);
+      console.error("Login error:", error);
     }
-};
+  };
 
   return (
     <div style={{

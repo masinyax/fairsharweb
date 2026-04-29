@@ -1,11 +1,9 @@
 "use client";
 
-import { db } from "@/lib/firebase"
-import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { signIn, signOut, onAuthChange } from "@/lib/auth";
 import { useEffect, useState, useRef, useMemo, Suspense } from "react";
-import { onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
@@ -114,7 +112,7 @@ function DashboardContent() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthChange((user) => {
             setSession(user ? { user } : null);
             setAuthLoading(false);
         });
@@ -153,19 +151,7 @@ function DashboardContent() {
 
     const handleGoogleSignIn = async () => {
         try {
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                displayName: user.displayName,
-                email: user.email,
-                photoURL: user.photoURL,
-                lastLogin: serverTimestamp()
-            }, { merge: true });
-
-            console.log("User data saved/updated in Firestore");
+            await signIn();
         } catch (error) {
             console.error("Login error:", error);
         }
@@ -173,7 +159,7 @@ function DashboardContent() {
 
     const handleSignOut = async () => {
         try {
-            await signOut(auth);
+            await signOut();
             router.push("/login");
         } catch (error) {
             console.error("Signout error:", error);
@@ -192,7 +178,7 @@ function DashboardContent() {
         }
 
         try {
-            const docRef = await addDoc(collection(db, "bills"), {
+            await addDoc(collection(db, "bills"), {
                 title: billTitle || "มื้ออาหารใหม่",
                 totalAmount: totalAmount,
                 items: items.map(i => ({ name: i.name, price: i.price, payees: i.payees })),
@@ -203,14 +189,14 @@ function DashboardContent() {
                 })),
                 createdAt: serverTimestamp(),
                 userId: session.user.uid,
-            })
+            });
 
-            alert(`บันทึกบิลสำเร็จ!`)
-            setItems([])
-            setBillTitle("")
+            alert("บันทึกบิลสำเร็จ!");
+            setItems([]);
+            setBillTitle("");
         } catch (error) {
-            console.error("Error:", error)
-            alert("เกิดข้อผิดพลาด: " + error.message)
+            console.error("Error:", error);
+            alert("เกิดข้อผิดพลาด: " + error.message);
         }
     };
 
@@ -356,7 +342,8 @@ function DashboardContent() {
                                 return (
                                     <div key={idx} style={{ display: 'flex', padding: '15px 10px', borderBottom: '1px solid #F1F1F1', fontSize: '14px', alignItems: 'center' }}>
                                         <span style={{ flex: 1.5, fontWeight: '600' }}>{p.name}</span>
-                                        <span style={{ flex: 1 }}>{p.total.toFixed(2)}</span>                                        <span style={{ flex: 1.5 }}>
+                                        <span style={{ flex: 1 }}>{p.total.toFixed(2)}</span>
+                                        <span style={{ flex: 1.5 }}>
                                             <span style={{ color: isPaid ? '#2D6A4F' : '#FFB7B2', fontSize: '11px', backgroundColor: isPaid ? '#E2FCEF' : '#FFF5F7', padding: '4px 8px', borderRadius: '8px', fontWeight: '700' }}>
                                                 {currentStatus}
                                             </span>
