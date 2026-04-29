@@ -2,11 +2,12 @@
 
 import { db } from "@/lib/firebase"
 import { collection, addDoc, serverTimestamp } from "firebase/firestore"
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, Suspense } from "react";
 import { onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+
 
 const AddItemModal = ({ isOpen, onClose, onConfirm, itemName, initialPrice = "0", isEdit = false }) => {
     const [price, setPrice] = useState("0");
@@ -91,7 +92,7 @@ const AddItemModal = ({ isOpen, onClose, onConfirm, itemName, initialPrice = "0"
     );
 };
 
-export default function DashboardPage() {
+function DashboardContent() {
     const [session, setSession] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
     const router = useRouter();
@@ -111,7 +112,6 @@ export default function DashboardPage() {
     const [viewingPayee, setViewingPayee] = useState(null);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-    // Firebase Auth listener
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setSession(user ? { user } : null);
@@ -415,5 +415,13 @@ export default function DashboardPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>กำลังโหลดหน้าแดชบอร์ด...</div>}>
+            <DashboardContent />
+        </Suspense>
     );
 }
