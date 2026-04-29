@@ -10,13 +10,23 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
-      router.push("/dashboard")
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+            lastLogin: serverTimestamp()
+        }, { merge: true });
+
+        console.log("User data saved/updated in Firestore");
     } catch (error) {
-      console.error("Login error:", error)
+        console.error("Login error:", error);
     }
-  }
+};
 
   return (
     <div style={{
