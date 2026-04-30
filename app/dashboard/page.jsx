@@ -121,12 +121,22 @@ function DashboardContent() {
 
     useEffect(() => {
         const scanned = searchParams.get("scanned");
-        if (scanned === "true") {
-            setItems(prev => [
-                ...prev,
-                { id: Date.now(), name: "รายการจากใบเสร็จ", price: 0, payees: [] }
-            ]);
-            router.replace("/dashboard");
+        const itemsData = searchParams.get("itemsData");
+        if (scanned === "true" && itemsData) {
+            try {
+                const parsedItems = JSON.parse(decodeURIComponent(itemsData));
+                setItems(
+                    parsedItems.map(item => ({
+                        id: Date.now() + Math.random(), 
+                        name: item.name,
+                        price: Number(item.price),
+                        payees: []
+                    }))
+                );
+                router.replace("/dashboard");
+            } catch (e) {
+                console.error("Parse scanned items error:", e);
+            }
         }
     }, [searchParams, router]);
 
