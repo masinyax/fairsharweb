@@ -112,12 +112,12 @@ function DashboardContent() {
     const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = onAuthChange((user) => {
-            setSession(user ? { user } : null);
-            setAuthLoading(false);
-        });
-        return () => unsubscribe();
-    }, []);
+    const unsubscribe = onAuthChange((user) => {
+        setSession(user ? { user } : null)
+        setAuthLoading(false)
+    })
+    return () => unsubscribe()
+}, [])
 
     useEffect(() => {
         const scanned = searchParams.get("scanned");

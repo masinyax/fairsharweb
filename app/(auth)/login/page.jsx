@@ -9,12 +9,12 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn();
-      router.push("/dashboard");
+        await signIn()
+        router.push("/dashboard")
     } catch (error) {
-      console.error("Login error:", error);
+        console.error("Login error:", error)
     }
-  };
+}
 
   return (
     <div style={{
