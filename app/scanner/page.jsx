@@ -37,9 +37,14 @@ export default function ScannerPage() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      alert(`เลือกรูปภาพ ${file.name} สำเร็จ! กำลังไปที่หน้าสรุปรายการ...`);
-      router.push(`/dashboard?image=${encodeURIComponent(imageUrl)}`);
+      const mockScannedItems = [
+        { name: "เทปโฟมสองหน้า 21", price: 29 },
+        { name: "เทปโฟมสองหน้า 21", price: 29 },
+        { name: "ลวดเย็บ MAX NO.", price: 10 }
+      ];
+      const itemsDataString = encodeURIComponent(JSON.stringify(mockScannedItems));
+      alert(`สแกนรายการจาก ${file.name} สำเร็จ!`);
+      router.push(`/dashboard?scanned=true&itemsData=${itemsDataString}`);
     }
   };
 
