@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 
 export default function HistoryPage() {
     const router = useRouter();
@@ -45,18 +45,17 @@ export default function HistoryPage() {
         }
     };
 
-    const handleUpdateStatus = (payeeName, newStatus) => {
-        setBillHistory(prev => prev.map(bill => {
-            if (bill.id === selectedBill.id) {
-                const updatedPayees = (bill.payees || []).map(p =>
-                    p.name === payeeName ? { ...p, status: newStatus } : p
-                );
-                const updatedBill = { ...bill, payees: updatedPayees };
-                setSelectedBill(updatedBill);
-                return updatedBill;
-            }
-            return bill;
-        }));
+    const handleUpdateStatus = async (payeeName, newStatus) => {
+        if (!selectedBill) return;
+
+        const prevBill = selectedBill;
+        const updatedPayees = (prevBill.payees || []).map(p => p.name === payeeName ? { ...p, status: newStatus } : p);
+        const updatedBill = { ...prevBill, payees: updatedPayees };
+
+        setSelectedBill(updatedBill);
+        setBillHistory(bh => bh.map(b => b.id === prevBill.id ? updatedBill : b));
+
+        await updateDoc(doc(db, "bills", prevBill.id), { payees: updatedPayees });
         setEditingPayee(null);
     };
 
